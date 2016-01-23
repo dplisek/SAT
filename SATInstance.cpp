@@ -6,6 +6,7 @@
 #include <istream>
 #include <iostream>
 #include <sstream>
+#include <math.h>
 #include "SATInstance.h"
 #include "SATEvaluation.h"
 
@@ -100,6 +101,7 @@ void SATInstance::solve() {
 
     clock_t tt2 = clock();
 
+    cout << "Solve time: " << ((double) tt2 - tt1) / (CLOCKS_PER_SEC / 1000) << endl;
 }
 
 void SATInstance::considerEvaluation(SATEvaluation &current, SATEvaluation &best, double temp, int &accepted, int &processed, bool simulation) {
@@ -109,12 +111,36 @@ void SATInstance::considerEvaluation(SATEvaluation &current, SATEvaluation &best
         double origValue = getValueToOptimize(current);
         int index = rand() % variableCount;
         current.toggleVariable(index);
-
+        double diff = getValueToOptimize(current) - origValue;
+        double randFloat = ((double) rand()) / RAND_MAX;
+        if (diff > 0 && randFloat > exp(-diff / temp)) {
+            ++processed;
+            revert(current, index);
+        } else {
+            if (simulation) {
+                if (diff > 0) {
+                    ++processed;
+                    ++accepted;
+                }
+            } else {
+                ++processed;
+                ++accepted;
+                if (current.isSatisfied() && getValueToOptimize(current) < getValueToOptimize(best)) {
+                    best = current;
+                    cerr << "Found new best result: " << best.weight << endl;
+                }
+            }
+        }
     }
 }
 
+void SATInstance::revert(SATEvaluation &evaluation, int index) {
+    evaluation.toggleVariable(index);
+}
+
 double SATInstance::getValueToOptimize(SATEvaluation &evaluation) {
-    return 1.0 / (evaluation.satisfiedClauseCount * evaluation.weight);
+    if (evaluation.weight == 0 || evaluation.satisfiedClauseCount == 0) return 1;
+    return 1.0 / pow(evaluation.satisfiedClauseCount, 2) * evaluation.weight;
 }
 
 bool SATInstance::acceptingEnough(int accepted, int processed) {

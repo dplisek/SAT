@@ -1,0 +1,7 @@
+c Priklad CNF
+c 4 promenne a 6 klauzuli
+c kazda klauzule konci nulou (ne novym radkem)
+p cnf 4 3
+1 1 1 0
+2 2 2 0
+3 3 3 0

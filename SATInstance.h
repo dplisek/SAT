@@ -39,6 +39,8 @@ public:
     void solve();
 
     double getValueToOptimize(SATEvaluation &evaluation);
+
+    void revert(SATEvaluation &evaluation, int index);
 };
 
 

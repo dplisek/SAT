@@ -26,6 +26,11 @@ public:
 
     void randomize();
     void toggleVariable(int index);
+    bool isSatisfied();
+
+    SATEvaluation& operator=(const SATEvaluation &other);
+
+    friend istream& operator >> (istream& in, SATClause &clause);
 };
 
 

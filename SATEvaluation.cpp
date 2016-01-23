@@ -5,6 +5,8 @@
 #include "SATEvaluation.h"
 
 SATEvaluation::SATEvaluation(SATInstance *instance) : instance(instance) {
+    weight = 0;
+    satisfiedClauseCount = 0;
     values = new bool[instance->variableCount];
     clausesTrue = new bool[instance->clauseCount];
 }
@@ -57,4 +59,20 @@ void SATEvaluation::toggleVariable(int index) {
             }
         }
     }
+}
+
+SATEvaluation &SATEvaluation::operator=(const SATEvaluation &other) {
+    for (int i = 0; i < instance->variableCount; ++i) {
+        values[i] = other.values[i];
+    }
+    for (int j = 0; j < instance->clauseCount; ++j) {
+        clausesTrue[j] = other.clausesTrue[j];
+    }
+    satisfiedClauseCount = other.satisfiedClauseCount;
+    weight = other.weight;
+    return *this;
+}
+
+bool SATEvaluation::isSatisfied() {
+    return satisfiedClauseCount == instance->clauseCount;
 }

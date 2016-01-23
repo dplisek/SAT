@@ -18,6 +18,7 @@ int main() {
     SATInstance instance(clauseSize);
     file >> instance;
 
+    instance.coolingFactor = 0.98;
     instance.solve();
 
     return 0;
