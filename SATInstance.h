@@ -18,6 +18,8 @@ class SATEvaluation;
 
 class SATInstance {
 
+    int step;
+
     bool getLine(istream &in, string &line);
 
     void considerEvaluation(SATEvaluation &current, SATEvaluation &best, double temp, int &accepted, int &processed, bool simulation);
@@ -36,7 +38,7 @@ public:
     SATInstance(int clauseSize);
     virtual ~SATInstance();
     friend istream& operator >> (istream& in, SATInstance &instance);
-    void solve();
+    bool solve(SATEvaluation &output);
 
     double getValueToOptimize(SATEvaluation &evaluation);
 

@@ -61,6 +61,7 @@ bool SATInstance::getLine(istream &in, string &lineOut) {
 }
 
 SATInstance::SATInstance(int clauseSize) : clauseSize(clauseSize) {
+    step = 0;
 }
 
 SATInstance::~SATInstance() {
@@ -78,7 +79,7 @@ SATInstance::~SATInstance() {
     }
 }
 
-void SATInstance::solve() {
+bool SATInstance::solve(SATEvaluation &output) {
     SATEvaluation best(this);
     SATEvaluation current(this);
     current.randomize();
@@ -90,18 +91,14 @@ void SATInstance::solve() {
         considerEvaluation(current, best, temp, accepted, processed, true);
     } while (!acceptingEnough(accepted, processed));
 
-    cerr << "Found starting temperature: " << temp << endl;
-
-    clock_t tt1 = clock();
-
     do {
         considerEvaluation(current, best, temp, accepted, processed, false);
         temp *= coolingFactor;
     } while (!isFrozen(accepted, processed));
 
-    clock_t tt2 = clock();
-
-    cout << "Solve time: " << ((double) tt2 - tt1) / (CLOCKS_PER_SEC / 1000) << endl;
+    if (best.weight == 0) return false;
+    output = best;
+    return true;
 }
 
 void SATInstance::considerEvaluation(SATEvaluation &current, SATEvaluation &best, double temp, int &accepted, int &processed, bool simulation) {
@@ -132,6 +129,7 @@ void SATInstance::considerEvaluation(SATEvaluation &current, SATEvaluation &best
             }
         }
     }
+//    *output << step++ << " " << getValueToOptimize(current) << endl;
 }
 
 void SATInstance::revert(SATEvaluation &evaluation, int index) {
@@ -140,7 +138,7 @@ void SATInstance::revert(SATEvaluation &evaluation, int index) {
 
 double SATInstance::getValueToOptimize(SATEvaluation &evaluation) {
     if (evaluation.weight == 0 || evaluation.satisfiedClauseCount == 0) return 1;
-    return 1.0 / pow(evaluation.satisfiedClauseCount, 2) * evaluation.weight;
+    return 1.0 / (pow(2, evaluation.satisfiedClauseCount) * evaluation.weight);
 }
 
 bool SATInstance::acceptingEnough(int accepted, int processed) {
